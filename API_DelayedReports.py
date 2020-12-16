@@ -46,11 +46,11 @@ app.config.update(
 celery = make_celery(app)
 #student usage report task is initiated
 @celery.task(bind=True, name="report1")
-def repor1(self,d):
+def report1(self,d):
     self.d=d[0]
     report1.func1(self.d)
     print("Report 1 generated and uploaded on S3")    
-@celery.task(bind=True, name="repor2")
+@celery.task(bind=True, name="report2")
 def report2(self,d,rep):
     self.d=d[0]
     self.rep=rep
@@ -58,7 +58,7 @@ def report2(self,d,rep):
     print("Report 2 generated and uploaded on S3")    
 #Mindspark Performance Report Download task is initiated
 @celery.task(bind=True, name="report3")
-def repor3(self,d):
+def report3(self,d):
     self.d=d[0]
     report3.func3(self.d)
     print("Report 3 generated and uploaded on S3") 
@@ -101,7 +101,7 @@ def report2():
         conn = None;
         cursor = None;
         # global d
-        a={}
+        b={}
         try:
             b=request.get_json()
                     
@@ -121,8 +121,8 @@ def report2():
     else:
         return jsonify({"message": "ERROR: Unauthorized"}), 401
 
-@app.route('/report1',methods=['POST'])
-def report1():
+@app.route('/report3',methods=['POST'])
+def report3():
     headers = request.headers
     auth = headers.get("###") #API Secret Key
     if auth == '****': #API Secret KeyValue
@@ -145,7 +145,7 @@ def report1():
             cur.execute("""insert into tablename (col1,col2, col3) VALUES %s """%entry_values_a )
             a1 = [a]
             #Delayed report activation
-            run_sur.delay(a1)
+            report3.delay(a1)
             return jsonify(status_code='Success Code',message='Success')
         except (KeyError, TypeError, ValueError) as e:
             return jsonify(e)
